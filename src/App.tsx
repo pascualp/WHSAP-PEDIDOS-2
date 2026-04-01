@@ -3,7 +3,7 @@ import { CATALOGO_RAW } from './catalogo';
 
 /* === CONFIG === */
 const WHATSAPP = "663336160";
-const LINK = "https://pascualp.github.io/pedidos-whatsapp/";
+const LINK = "https://whsap-pedidos-2.vercel.app/";
 const TAB = "\t";
 
 /* === Alias/sinónimos típicos === */
@@ -446,9 +446,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
-      <header className="max-w-4xl mx-auto p-4">
-        <h1 className="text-xl font-bold mb-1">Pedido — Cliente 4544</h1>
-        <p className="text-sm text-slate-500">Buscador tolerante a errores + alias. Web sin código, WhatsApp con código. Vista previa con eliminar.</p>
+      <header className="max-w-4xl mx-auto p-4 flex justify-center">
+        <img 
+          src="https://bonany.com/wp-content/uploads/2023/04/logo-bonany-1.png" 
+          alt="BonAny Logo" 
+          className="h-16 w-auto"
+        />
       </header>
 
       <main className="max-w-4xl mx-auto p-4 space-y-4">
@@ -580,10 +583,6 @@ export default function App() {
         </div>
 
         <section className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-          <div className="text-sm text-slate-500 mb-3">
-            Vista previa del pedido (web sin código). WhatsApp se envía con código y TABs para pegar en Excel.
-          </div>
-
           <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
             <div className="max-h-[52vh] overflow-auto">
               <table className="w-full min-w-[780px] text-left border-collapse">

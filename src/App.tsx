@@ -659,7 +659,10 @@ export default function App() {
                       <tr key={p.c} className="border-b border-slate-100 last:border-0">
                         <td className="p-2 sm:p-3 font-mono text-xs sm:text-sm align-top">{cleanCell(p.q)}</td>
                         <td className="p-2 sm:p-3 text-xs sm:text-sm align-top">{cleanCell(p.f)}</td>
-                        <td className="p-2 sm:p-3 text-xs sm:text-sm align-top">{cleanCell(p.d)}</td>
+                        <td className="p-2 sm:p-3 text-xs sm:text-sm align-top">
+                          {cleanCell(p.d)}
+                          <span className="hidden"> ({cleanCell(p.f)})</span>
+                        </td>
                         <td className="p-2 sm:p-3 text-xs sm:text-sm align-top">{cleanCell(p.o)}</td>
                         <td className="p-2 sm:p-3 align-top">
                           <div className="flex flex-col gap-1">

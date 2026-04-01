@@ -142,6 +142,43 @@ export default function App() {
   const [pedido, setPedido] = useState<PedidoItem[]>([]);
   const [actual, setActual] = useState<{ c: string; d: string } | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    } else {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Tu navegador no soporta el reconocimiento de voz.");
+        return;
+      }
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'es-ES';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setSearchTerm(transcript);
+        setIsListening(false);
+      };
+      
+      recognition.onerror = () => {
+        setIsListening(false);
+      };
+      
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+      
+      recognitionRef.current = recognition;
+      recognition.start();
+      setIsListening(true);
+    }
+  };
   
   const [searchTerm, setSearchTerm] = useState("");
   const [qty, setQty] = useState("");
@@ -471,26 +508,35 @@ export default function App() {
 
         <div className={activeTab === 'search' ? 'block space-y-4' : 'hidden'}>
           <section className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-            <input
-              ref={searchInputRef}
-              value={searchTerm}
-              onChange={e => {
-                if (blockIfIncomplete()) return;
-                setSearchTerm(e.target.value);
-              }}
-              onPaste={e => {
-                const pasted = e.clipboardData.getData('text');
-                if (pasted.includes('\n')) {
-                  e.preventDefault();
-                  setBulkText(pasted);
-                  setActiveTab('bulk');
-                  showToast("Modo lista activado automáticamente");
-                }
-              }}
-              onFocus={handleSearchFocus}
-              placeholder="Buscar por código o nombre (min 3 letras)..."
-              className="w-full p-3 text-base border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="relative flex items-center">
+              <input
+                ref={searchInputRef}
+                value={searchTerm}
+                onChange={e => {
+                  if (blockIfIncomplete()) return;
+                  setSearchTerm(e.target.value);
+                }}
+                onPaste={e => {
+                  const pasted = e.clipboardData.getData('text');
+                  if (pasted.includes('\n')) {
+                    e.preventDefault();
+                    setBulkText(pasted);
+                    setActiveTab('bulk');
+                    showToast("Modo lista activado automáticamente");
+                  }
+                }}
+                onFocus={handleSearchFocus}
+                placeholder="Buscar por código o nombre (min 3 letras)..."
+                className="w-full p-3 pr-12 text-base border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                onClick={toggleListening}
+                className={`absolute right-3 p-2 rounded-full transition-colors ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                title="Escribir por audio"
+              >
+                🎤
+              </button>
+            </div>
           
           {searchResults.length > 0 && !actual && (
             <div className="mt-2 border border-slate-200 rounded-xl overflow-hidden bg-white max-h-80 overflow-y-auto">

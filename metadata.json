@@ -1,5 +1,5 @@
 {
-  "name": "",
-  "description": "",
-  "requestFramePermissions": []
+  "name": "BonAny Pedidos",
+  "description": "Aplicación para gestión de pedidos de frutas y verduras.",
+  "requestFramePermissions": ["microphone"]
 }

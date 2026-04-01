@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pedido (WhatsApp) - Fruites Bonany</title>
+  <style>
+    :root{
+      --border:#222;
+      --bg:#fff;
+      --muted:#f2f2f2;
+      --text:#111;
+      --radius:12px;
+    }
+    body{ font-family: Arial, sans-serif; margin: 12px; color:var(--text); background:var(--bg); }
+    .wrap{ max-width: 980px; margin: 0 auto; }
+    h1{ font-size: 18px; margin: 8px 0 12px; text-align:center; }
+
+    table{ width:100%; border-collapse: collapse; }
+    th, td{ border:1px solid var(--border); padding:10px; font-size:14px; vertical-align: middle; }
+    th{ background: var(--muted); text-align:left; }
+
+    .num{ width:110px; }
+    .fmt{ width:180px; }
+    .code{ width:90px; text-align:center; }
+
+    input[type="number"], input[type="text"], select{
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      border: 1px solid #bbb;
+      border-radius: 10px;
+      font-size: 16px; /* importante para que iOS no haga zoom */
+      background: #fff;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+    button{
+      padding: 12px 14px;
+      border: 1px solid #111;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:active{ transform: scale(0.99); }
+    textarea{
+      width:100%;
+      height: 160px;
+      margin-top: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+      border-radius: 12px;
+      border: 1px solid #bbb;
+      font-size: 14px;
+    }
+    .note{ font-size: 12px; color:#333; margin-top:8px; }
+
+    /* ===========================
+       MÓVIL: tabla -> tarjetas
+       =========================== */
+    @media (max-width: 720px){
+      body{ margin: 10px; }
+      h1{ font-size: 16px; }
+
+      table, thead, tbody, th, td, tr { display: block; }
+      thead{ display:none; }
+
+      tr{
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin: 10px 0;
+        overflow: hidden;
+        background: #fff;
+      }
+      td{
+        border: none;
+        border-top: 1px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px;
+      }
+      td:first-child{ border-top: none; }
+
+      /* Etiqueta a la izquierda, valor a la derecha */
+      td::before{
+        content: attr(data-label);
+        font-weight: 700;
+        min-width: 42%;
+      }
+
+      /* Para campos de texto/input, ocupar bien el espacio */
+      td > *{
+        flex: 1;
+      }
+
+      /* Botones en columna, ancho completo */
+      .actions{
+        flex-direction: column;
+      }
+      .actions button{
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>PLANTILLA DE PEDIDO (WHATSAPP) – FRUITES BONANY</h1>
+
+    <table id="tabla">
+      <thead>
+        <tr>
+          <th class="num">Cantidad</th>
+          <th class="fmt">Formato (kg/caja/ud)</th>
+          <th class="code">Código</th>
+          <th>Descripción</th>
+          <th>Observaciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <!-- Ejemplo: Código/Descripción fijos -->
+        <tr data-code="1101" data-desc="Tomate pera">
+          <td class="num" data-label="Cantidad">
+            <input type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+          </td>
+          <td class="fmt" data-label="Formato">
+            <select>
+              <option value="">—</option>
+              <option value="kg">kg</option>
+              <option value="caja">caja</option>
+              <option value="ud">ud</option>
+            </select>
+          </td>
+          <td class="code" data-label="Código">1101</td>
+          <td data-label="Descripción">Tomate pera</td>
+          <td data-label="Observaciones">
+            <input type="text" placeholder="">
+          </td>
+        </tr>
+
+        <tr data-code="2050" data-desc="Naranja mesa">
+          <td class="num" data-label="Cantidad"><input type="number" min="0" step="1" inputmode="numeric" placeholder="0"></td>
+          <td class="fmt" data-label="Formato">
+            <select><option value="">—</option><option value="kg">kg</option><option value="caja">caja</option><option value="ud">ud</option></select>
+          </td>
+          <td class="code" data-label="Código">2050</td>
+          <td data-label="Descripción">Naranja mesa</td>
+          <td data-label="Observaciones"><input type="text"></td>
+        </tr>
+
+        <tr data-code="3012" data-desc="Aguacate Hass">
+          <td class="num" data-label="Cantidad"><input type="number" min="0" step="1" inputmode="numeric" placeholder="0"></td>
+          <td class="fmt" data-label="Formato">
+            <select><option value="">—</option><option value="kg">kg</option><option value="caja">caja</option><option value="ud">ud</option></select>
+          </td>
+          <td class="code" data-label="Código">3012</td>
+          <td data-label="Descripción">Aguacate Hass</td>
+          <td data-label="Observaciones"><input type="text"></td>
+        </tr>
+
+        <tr data-code="4120" data-desc="Plátano">
+          <td class="num" data-label="Cantidad"><input type="number" min="0" step="1" inputmode="numeric" placeholder="0"></td>
+          <td class="fmt" data-label="Formato">
+            <select><option value="">—</option><option value="kg">kg</option><option value="caja">caja</option><option value="ud">ud</option></select>
+          </td>
+          <td class="code" data-label="Código">4120</td>
+          <td data-label="Descripción">Plátano</td>
+          <td data-label="Observaciones"><input type="text"></td>
+        </tr>
+
+        <tr data-code="5233" data-desc="Manzana Golden">
+          <td class="num" data-label="Cantidad"><input type="number" min="0" step="1" inputmode="numeric" placeholder="0"></td>
+          <td class="fmt" data-label="Formato">
+            <select><option value="">—</option><option value="kg">kg</option><option value="caja">caja</option><option value="ud">ud</option></select>
+          </td>
+          <td class="code" data-label="Código">5233</td>
+          <td data-label="Descripción">Manzana Golden</td>
+          <td data-label="Observaciones"><input type="text"></td>
+        </tr>
+
+        <tr data-code="6388" data-desc="Lechuga romana">
+          <td class="num" data-label="Cantidad"><input type="number" min="0" step="1" inputmode="numeric" placeholder="0"></td>
+          <td class="fmt" data-label="Formato">
+            <select><option value="">—</option><option value="kg">kg</option><option value="caja">caja</option><option value="ud">ud</option></select>
+          </td>
+          <td class="code" data-label="Código">6388</td>
+          <td data-label="Descripción">Lechuga romana</td>
+          <td data-label="Observaciones"><input type="text"></td>
+        </tr>
+
+        <tr data-code="7445" data-desc="Cebolla dulce">
+          <td class="num" data-label="Cantidad"><input type="number" min="0" step="1" inputmode="numeric" placeholder="0"></td>
+          <td class="fmt" data-label="Formato">
+            <select><option value="">—</option><option value="kg">kg</option><option value="caja">caja</option><option value="ud">ud</option></select>
+          </td>
+          <td class="code" data-label="Código">7445</td>
+          <td data-label="Descripción">Cebolla dulce</td>
+          <td data-label="Observaciones"><input type="text"></td>
+        </tr>
+
+        <tr data-code="8550" data-desc="Limón">
+          <td class="num" data-label="Cantidad"><input type="number" min="0" step="1" inputmode="numeric" placeholder="0"></td>
+          <td class="fmt" data-label="Formato">
+            <select><option value="">—</option><option value="kg">kg</option><option value="caja">caja</option><option value="ud">ud</option></select>
+          </td>
+          <td class="code" data-label="Código">8550</td>
+          <td data-label="Descripción">Limón</td>
+          <td data-label="Observaciones"><input type="text"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="actions">
+      <button type="button" onclick="generar()">Generar pedido</button>
+      <button type="button" onclick="copiar()">Copiar pedido</button>
+      <button type="button" onclick="enviarWhatsApp()">Enviar por WhatsApp</button>
+      <button type="button" onclick="limpiar()">Limpiar</button>
+    </div>
+
+    <textarea id="salida" placeholder="Aquí aparecerá el pedido generado..."></textarea>
+    <div class="note">Solo se incluirán líneas con Cantidad &gt; 0 y con Formato seleccionado.</div>
+  </div>
+
+<script>
+  function generarTexto() {
+    const filas = document.querySelectorAll("#tabla tbody tr");
+    let lineas = [];
+
+    filas.forEach(tr => {
+      const cantidadEl = tr.querySelector('input[type="number"]');
+      const formatoEl  = tr.querySelector('select');
+      const obsEl      = tr.querySelector('input[type="text"]');
+
+      const cantidad = Number(cantidadEl.value);
+      const formato  = (formatoEl.value || "").trim();
+      const obs      = (obsEl.value || "").trim();
+      const code     = tr.dataset.code;
+      const desc     = tr.dataset.desc;
+
+      if (Number.isFinite(cantidad) && cantidad > 0) {
+        if (!formato) return; // si hay cantidad pero no formato, se omite (o puedes forzar aviso)
+        lineas.push(`${cantidad} ${formato} - ${code} ${desc}${obs ? " ("+obs+")" : ""}`);
+      }
+    });
+
+    return lineas.length ? ("PEDIDO:\n" + lineas.join("\n")) : "No hay artículos rellenados.";
+  }
+
+  function generar() {
+    document.getElementById("salida").value = generarTexto();
+  }
+
+  async function copiar() {
+    const txt = generarTexto();
+    document.getElementById("salida").value = txt;
+    try {
+      await navigator.clipboard.writeText(txt);
+      alert("Pedido copiado. Pégalo en WhatsApp.");
+    } catch(e) {
+      alert("No se pudo copiar automáticamente. Selecciona el texto y copia manualmente.");
+    }
+  }
+
+  function enviarWhatsApp() {
+    const txt = generarTexto();
+    document.getElementById("salida").value = txt;
+    const url = "https://wa.me/?text=" + encodeURIComponent(txt);
+    window.open(url, "_blank");
+  }
+
+  function limpiar() {
+    document.querySelectorAll('#tabla input[type="number"]').forEach(i => i.value = "");
+    document.querySelectorAll('#tabla select').forEach(s => s.value = "");
+    document.querySelectorAll('#tabla input[type="text"]').forEach(t => t.value = "");
+    document.getElementById("salida").value = "";
+  }
+</script>
+</body>
+</html>

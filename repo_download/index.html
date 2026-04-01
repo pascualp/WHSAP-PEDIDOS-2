@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pedido — Cliente 4544</title>
+
+  <style>
+    :root{
+      --bg:#f4f6f8;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#475569;
+      --line:#e2e8f0;
+      --ok:#16a34a;
+      --warn:#d97706;
+      --bad:#dc2626;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header, main{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 14px;
+    }
+    h1{ font-size:18px; margin:0 0 6px }
+    .subtitle{ font-size:14px; color:var(--muted); margin:0 }
+
+    .card{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      margin-bottom:12px;
+    }
+
+    input, select, textarea{
+      width:100%;
+      padding:14px;
+      font-size:16px;
+      border-radius:12px;
+      border:1px solid var(--line);
+    }
+
+    .results{
+      border:1px solid var(--line);
+      border-radius:12px;
+      margin-top:8px;
+      display:none;
+      overflow:hidden;
+      background:#fff;
+      max-height: 320px;
+      overflow-y:auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .result-item{
+      padding:10px;
+      border-bottom:1px solid var(--line);
+      cursor:pointer;
+    }
+    .result-item:last-child{ border-bottom:none }
+    .code{
+      color:#1d4ed8; font-size:13px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    .desc{ font-size:14px }
+
+    .selected{ display:none; margin-top:12px }
+
+    .actions{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:10px;
+    }
+    .btn{
+      padding:14px;
+      font-size:16px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:600;
+    }
+    .btn.good{ background:#dcfce7; border-color:#16a34a }
+    .btn.danger{ background:#fee2e2; border-color:#dc2626 }
+
+    .status{ font-size:14px; margin-top:8px }
+    .status.ok{ color:var(--ok) }
+    .status.warn{ color:var(--warn) }
+    .status.bad{ color:var(--bad) }
+
+    .field-error{
+      border-color: var(--bad) !important;
+      outline: 2px solid rgba(220,38,38,.15);
+    }
+
+    .table-wrap{
+      border:1px solid var(--line);
+      border-radius:12px;
+      overflow:hidden;
+      background:#fff;
+    }
+    .table-scroll{
+      max-height: 52vh;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width: 780px;
+    }
+    thead th{
+      position: sticky;
+      top: 0;
+      background: #f8fafc;
+      z-index: 1;
+      font-size: 13px;
+      text-align:left;
+      color: var(--muted);
+      border-bottom:1px solid var(--line);
+      padding:10px;
+      white-space:nowrap;
+    }
+    tbody td{
+      border-bottom:1px solid var(--line);
+      padding:10px;
+      vertical-align:top;
+      font-size:14px;
+    }
+    tbody tr:last-child td{ border-bottom:none; }
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 13px;
+    }
+    .muted{ color: var(--muted); font-size: 13px; }
+
+    #obs{ min-height: 120px; }
+    @media (max-width: 768px){
+      #obs{ min-height: 72px; }
+    }
+
+    .btn-mini{
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:700;
+      cursor:pointer;
+      font-size:14px;
+    }
+    .btn-mini.danger{
+      background:#fee2e2;
+      border-color:#dc2626;
+    }
+
+    /* TOAST */
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(15,23,42,.92);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.18);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index: 9999;
+      max-width: calc(100vw - 24px);
+      text-align:center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .toast.show{
+      opacity: 1;
+      transform: translateX(-50%) translateY(-2px);
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <h1>Pedido — Cliente 4544</h1>
+  <p class="subtitle">Buscador tolerante a errores + alias. Web sin código, WhatsApp con código. Vista previa con eliminar.</p>
+</header>
+
+<main>
+
+<section class="card">
+  <input id="search" placeholder="Buscar por código o nombre (min 3 letras)..." />
+  <div id="results" class="results"></div>
+
+  <div id="selected" class="selected">
+    <p><strong id="selCode"></strong> — <span id="selDesc"></span></p>
+
+    <input id="qty" placeholder="Cantidad" inputmode="decimal">
+    <select id="fmt">
+      <option value="">Formato</option>
+      <option value="kg">kg</option>
+      <option value="caja">caja</option>
+      <option value="ud">ud</option>
+    </select>
+    <textarea id="obs" placeholder="Observaciones (opcional)"></textarea>
+
+    <div class="actions">
+      <button class="btn danger" id="cancelEdit">Cancelar edición</button>
+    </div>
+  </div>
+
+  <div id="status" class="status"></div>
+</section>
+
+<section class="card">
+  <div class="muted" style="margin-bottom:10px">
+    Vista previa del pedido (web sin código). WhatsApp se envía con código y TABs para pegar en Excel.
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:90px">Cantidad</th>
+            <th style="width:90px">Formato</th>
+            <th>Descripción</th>
+            <th style="width:260px">Observaciones</th>
+            <th style="width:120px">Acción</th>
+          </tr>
+        </thead>
+        <tbody id="pedidoTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn good" id="wa">Enviar por WhatsApp</button>
+    <button class="btn danger" id="clear">Limpiar pedido</button>
+  </div>
+</section>
+
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* === CONFIG === */
+const WHATSAPP = "663336160";
+const LINK = "https://pascualp.github.io/pedidos-whatsapp/";
+const TAB = "\t";
+
+/* === Alias/sinónimos típicos === */
+const ALIASES = [
+  { from: ["mesclum","mezclun","mezclu","mezcl","mix","mixtura","mezclum"], to: "mezclum" },
+  { from: ["rucula","rúcula","rocket"], to: "rucula" },
+  { from: ["aisberg","iceberg","ice-berg"], to: "iceberg" },
+  { from: ["canonigos","canónigos","canonigo"], to: "canonigo" },
+  { from: ["patata","papas","papa"], to: "patata" },
+  { from: ["tomate","tomates"], to: "tomate" },
+  { from: ["pepino","pepin"], to: "pepino" }
+];
+
+const IGNORE_WORDS = new Set([
+  "manojo","mallorca","caja","cajas","kilo","kilos","kg","ud","unidad","unidades",
+  "bandeja","bandejas","extra","primera","importacion","importación","gr","g","mm",
+  "floret","x","por","de","la","el","y","con","sin","del","al"
+]);
+
+/* === CATÁLOGO === */
+const CATALOGO_RAW = `
+343	MINI ESPARRAGO
+468	BROTES RADICHIO
+5000	MANZANA ROYAL GALA 24
+5570	MANZANA STARKING 24
+3580	MELON GALIA
+7790	SANDIA MALLORCA
+5571	MANZANA STARKING 20
+3281	COCO DE AGUA
+9091	ALFALFA KILO
+5502	CAQUI PERSIMON
+5562	MANZANA GRAN SMITH 20
+3592	NECTARINA 20
+9943	PIÑA AVION CAJA
+4793	SANDIA NEGRA SIN PEPITA
+6004	PERA BLANQUILLA 20
+3584	MELON ERIZO MALLORCA
+9015	ALGA SALICORNIA - ESPARRAGO DE MAR
+1065	FRUTA RODAJAS - TROCEADAS
+2576	MELOCOTON AMARILLO 26
+7578	MELON PIEL DE SAPO MALLORCA
+10	ACELGA MALLORCA
+20	LIMAS
+30	BERROS
+40	MENTA MANOJO
+50	APIO MANOJO VERDE MALLORCA
+60	HIERBA BUENA MANOJO MALLORCA
+70	ALBAHACA MANOJO
+35	ENELDO FRESCO MANOJO
+55	CEBOLLINO MANOJO MALLORCA
+65	RADICCIO
+36	ENELDO MALLORCA
+66	CHALOTA
+47	AJOS TIERNOS
+67	CHALOTA PELADA
+500	LAUREL MANOJO MALLORCA
+800	SOFRITOS MANOJO MALLORCA
+910	REMOLACHA FRESCA
+420	ICEBERG CORTADA 20 MM 1KG
+520	NAPICOL
+230	CEBOLLA COMÚN
+830	RABANITOS MANOJO
+840	SOPAS MALLORCA
+450	HIERBAS CARACOLES MALLORCA
+360	COLIFLOR MALLORCA
+460	OREGANO BOLSA 1 KG
+670	PEREJIL MANOJO MALLORCA
+380	ESPINACAS MALLORCA
+780	PUERROS MALLORCA
+801	CEBOLLETAS MALLORCA
+231	CEBOLLA BLANCA
+831	RABANITO HOLANDES
+451	ROMERO MALLORCA
+671	PERIFOLLO MANOJO MALLORCA
+481	ICEBERG 250G FLORET
+681	PATATA LAVADA 25 Kg.
+691	PATATA JUMBO 25 Kg.
+482	RUCULA BARQUETA 150G FLORET
+682	PATATA PASTA BLANCA 25 Kg.
+782	PUERRO GORDO EXTRA
+692	PATATA BLANCA 5 Kg. MALLORCA
+433	ENSALADA MEZCLUM FLORET 500 GR. 4 ING
+463	RUCULA GRANEL 1 Kg.
+473	GOURMET ENSALADA 175G FLORET
+493	ENSALADA MEZCLUM MIXTURA FLORET
+693	PATATA ROJA
+804	HUEVOS CAMPEROS
+234	CEBOLLA PELADA MALLORCA
+834	RABANO BLANCO DAIKON
+344	ESPARRAGOS VERDES GORDOS
+454	CILANTRO MANOJO MALLORCA
+694	PATATA MORADA
+405	ESCAROLA FRISE
+805	HUEVOS XL
+235	CEBOLLA MORADA
+835	RABANOS MALLORCA
+445	ENSALADA MEZCLUM MEDITERRANEA 500Gr.FLORET
+455	ROMANESCO
+385	ESPINACA HOJAS 250G FLORET
+695	PATATO MALLORCA
+406	ESCAROLAS MALLORCA
+706	PATATA AGRIA PELADA
+806	HUEVOS ESTUCHADOS
+456	GERMINADO DE ALFALFA
+696	PATATO PELADO 10 kg MALLORCA
+807	HUEVOS L
+447	ENSALADA MEZCLUM 1 Kg.(8 ingred)
+457	BROTES MIZUNA
+477	BERROS FLORET 125G
+497	SALVIA MALLORCA
+697	PATATA AGRIA ESPECIAL FREIR
+808	HUEVOS CODORNIZ
+518	NABOS POR KG.
+458	FLOR DE HIELO - BROCOLI
+488	CANONIGO BARQUETA DE 100G FLORET
+498	OREGANO (MEJORANA) MJ MALLORCA
+698	PATATA PELADA DADOS - CUADROS MALLORCA 
+809	HUEVOS M
+439	PACHOE x kgs
+459	BROTES DE MOSTAZA
+469	REMOLACHA AMARILLA
+499	TOMILLO MANOJO MALLORCA
+699	PATATA PARMENTINE
+6200	PERA ERCOLINA
+3400	ENDIVIA BELGA BANDEJA
+6400	PERA CONFERENCIA 26
+5500	CAQUIS MALLORCA
+3600	NARANJA ZUMO
+2010	GERMINADO DE RABANO
+9010	FLOR DE CALABACIN
+1210	CEREZAS
+1410	FRESAS MALLORCA
+1510	GIRGOLAS
+4510	MANGOS
+1710	PLATANO BAN
+9910	YUCA
+3420	GRANADAS IMPORTACION
+3520	COGOLLOS DE TUDELA
+9520	LECHUGA ROMANA MALLORCA
+1620	SETAS
+4720	PIMIENTO ROJO PRIMERA
+1630	GUISANTES
+3630	NARANJA HOJA MALLORCA
+4730	MINI PIMIENTO
+9050	HOJA DE OSTRA
+3550	MAIZ COCIDO
+3750	REMOLACHA COCIDA
+1060	ALCACHOFA
+9060	MICRO MEZCLUM FLOR BANDEJA 60GR
+1160	CALABAZA MALLORCA
+4260	CHIRIMOLLAS
+1460	HIGOS FRESCOS
+9660	PEPINOS
+4860	TIRABEQUES
+9960	GARRAFA SUC LLIMONA 5L
+1070	ALBARICOQUE
+3470	HINOJO RAIZ
+2570	MELOCOTON ROJO 24
+3080	APIO BLANCO
+4180	CALABACIN NEGRO
+3280	COCOS
+4480	JUDIA ANCHA
+1980	ZANAHORIA kilos
+9090	SOJA KILO
+3590	NECTARINA 24
+3790	PARAGUAYOS
+4790	SANDIA RAYADA - NEGRA
+1990	MINI ZANAHORIA NEGRA
+1	OTROS/VARIOS
+2001	GERMINADOS CEBOLLA
+5001	MANZANA ROYAL GALA 24-26
+6001	PERA BLANQUILLA 26
+9001	TOMATE CHERRY BANDEJAS 250 GR
+9101	ZANAHORIA AMARILLA
+6401	PERA CONFERENCIA 24
+3601	NARANJA VALENCIA
+9801	TOMATE NEGRO (KUMATO)
+2011	GERMINADO DE PUERRO
+9011	NARANJA DE LA CHINA (KUMQUAT) x caja
+1511	GIRGOLAS BANDEJA
+4511	MANGO AVION X CAJA
+9911	TOMATE RAF
+9021	FRUTA DE LA PASION CAJA
+3521	LECHUGA ICEBERG
+1621	SETAS PICORNELL
+3041	AJOS FLOR
+5041	MANZANA PINK LADY Calibre 20
+4141	BONIATO BLANCO
+1241	CHAMPIÑON MALLORCA
+3541	LIMON EXTRA
+9051	MICRO MEZCLUM
+3551	MAIZ MAZORCAS
+3651	ÑORAS KILOS
+9061	MINI PUERRO
+9661	PEPINO HOLANDES
+3761	POMELO ROJO
+3961	UVA ROSADA RED GLOBE
+3371	DATIL RAMA
+3471	HINOJO HOJA MANOJO MALLORCA
+2571	MELOCOTON ROJO 26
+9971	KALE
+4181	CALABACIN BLANCO
+3581	MELON MARINA MALLORCA
+1881	TOMATE RAMILLETE SUELTO MALLORCA
+6981	PATATA PELADA ENTERA MALLORCA
+3591	NECTARINA 24 - 26
+3691	PATATO PRECOCINADO
+3791	PAPAYAS
+9991	GERMINADO DE SOJA
+2002	SHISO - SAKURA (GERMINADOS)(CAJA)
+5002	MANZANA ROYAL GALA 20
+6002	PERA BLANQUILLA 32
+9002	FLOR COMESTIBLE
+3302	COL REPOLLO
+3402	ENDIVIA ROJA
+6402	PERA CONFERENCIA 20
+9902	TOMATE CORAZON DE BUEY
+9012	CARAMBOLAS CAJA
+3512	KIWIS ITALIA
+9912	HOJA ROBLE VERDE MALLORCA
+3022	AGUACATES CAJA (TROPS O SIMILAR)
+2522	LECHUGA TROCADERO MALLORCA
+1622	SETAS SIICHIS-TAKE
+9032	PITAHAYA CAJA - FRUTA DEL DRAGON
+1232	CEBOLLA MORADA PELADA
+3042	AJO PELADO
+5042	MANZANA PINK LADY Calibre 26
+4142	BATATA
+1242	CHAMPIÑON PORTOBELLO
+9052	TAMARINDO
+3252	CIRUELA BLANCA
+3552	MINI MAZORCA
+9062	MINI REMOLACHA
+4862	TIRABEQUES MINI CAJA
+3962	UVA NEGRA SIN PEPITA
+3472	RAIZ DE APIO
+1982	ZANAHORIA RALLADA IV GAMA 1Kg.
+6982	PATATA PELADA ESPAÑOLA MALLORCA
+9982	TOMATE SECO
+4792	SANDIA FASHION/BOUQUET
+2003	HOJAS DE SHISO (BANDEJAS)
+6003	PERA BLANQUILLA 24
+9003	FRAMBUESA
+3303	COL LOMBARDA
+7303	COL LOMBARDA MALLORCA
+9903	HOJAS ROBLE MALLORCA
+3513	KIWIS NUEVA ZELANDA
+3023	AGUACATES GRANEL
+4123	BERENJENA
+1723	PIMIENTO PADRON
+9033	HOJA DE PLATANO
+9043	TOMATE CHERRY PERA
+3253	CIRUELA ROJA
+5563	MANZANA GRAN SMITH 24
+1173	BIMI
+3373	DATILES SIN HUESO 5 Kg.
+3683	CLEMENTINA
+5683	MANZANA GOLDEN EXTRA
+1983	MINI ZANAHORIA
+6983	PATATA PELADA PANADERA MALLORCA
+2004	AFILA CRESS GERMINADO ACEDERA x bdjas
+9004	GROSELLA
+3604	NARANJA VALENCIA CONFECCIONADA
+8904	PUERROS HOLANDES
+9904	TOMATE SUPER EXTRA (GGG)
+3514	KIWI AMARILLO x CAJA
+9024	MARACUYA (x caja)
+4124	BERENJENA RAYADA
+9034	TOPINAMBUR
+9044	TOMATE CHERRY RAMA
+1244	CHAMPIÑON BANDEJA 350 gr
+5564	MANZANA GRAN SMITH IMPORTACION
+5684	MANZANA GOLDEN 20
+6984	PATATA PELADA ENSALADILLA MALLORCA
+2005	GERMINADO DE REMOLACHA
+9005	MORAS
+3305	COL CHINA
+9905	TOMATE EXTRA (G)
+3515	KIWI ZESPRI
+1725	GUINDILLA FRESCA VERDE - ROJA
+4725	PIMIENTO ITALIANO
+9045	TAMARILLO (CAJA)
+1245	CHAMPIÑON LAMINADO Bja 250 gr
+3745	PIÑA TROPICAL MONTE
+3455	JALAPEÑOS
+2575	MELOCOTON AMARILLO (24)
+3575	MELON BOLLO - EL ABUELO
+4485	JUDIA FINA
+5685	MANZANA GOLDEN 24
+2006	GERMINADO DE AJO
+9006	ARANDANOS
+1706	PLATANO PRIMERA
+9906	TOMATE PERA
+9026	TOMATE CHERRY AMARILLO
+9046	TOMATE CHERRY GRANEL
+3746	PIÑA COSTA RICA
+4946	UVA BLANCA SIN PEPITA
+5686	MANZANA GOLDEN 26
+9996	ESTRAGON
+2007	GERMINADO COL LOMBARDA
+9007	PHYSALIS
+1707	PLATANO MACHO
+9907	TOMATE BOLA MM
+9027	MINI CALABACIN
+4727	PIMIENTO AMARILLO
+9057	TOMATE CHERRY COCTEL
+5567	MANZANA FUJI IMPORTACION
+4477	TOMATE NATURAL RALLADO BIBERON 750GR
+3577	MELON CANTALOUP
+5577	MANZANA FUJI NACIONAL 24
+1987	ZANAHORIA PELADA ENTERA
+9987	LOLO ROSA MALLORCA
+2008	GERMINADOS DE GUISANTE - ESPARRAGO
+9908	TOMATE RAMA
+9018	LEMONGRASS (citronella)
+9918	TOMATE ROSA FEO
+9028	MINI BERENJENA
+4728	PIMIENTO BLANCO
+4948	UVA BLANCA EXTRA
+9958	ZUMOS FRUTA - VERDURA
+5568	MANZANA ROJA
+4478	TOMATE NATURAL RALLADO BIBERON 1100GR
+3578	MELON PIEL DE SAPO
+9988	LOLO VERDE MALLORCA
+2009	GERMINADO DE LENTEJA
+1409	FRESA
+9909	JENGIBRE
+3519	CORAZON DE COGOLLO
+1629	SETAS CARDO
+4729	PIMIENTO LAMUYO VERDE
+9039	MANGOSTAN CAJA
+3049	AJO NEGRO
+1249	CHAMPIÑON CR
+9959	GARRAFA SMOOTHIE DE 3 LITROS
+5569	MANZANA STARKING IMPORTACION
+3579	MELON AMARILLO
+9979	GARRAFA SUC TARONJA 5L
+7253	CIRUELA ROJA MALLORCA
+`;
+
+function parseCatalog(raw){
+  const items = [];
+  raw.split(/\r?\n/).forEach(line=>{
+    const t = line.trim();
+    if(!t) return;
+    const parts = t.split(/\t+/);
+    if(parts.length >= 2){
+      const c = parts[0].trim();
+      const d = parts.slice(1).join(" ").trim();
+      if(c && d) items.push({c, d});
+    }
+  });
+  return items;
+}
+const ARTICULOS = parseCatalog(CATALOGO_RAW);
+
+/* === ESTADO === */
+let pedido = []; // {c,d,q,f,o}
+let actual = null;
+let autosaveTimer = null;
+
+/* DOM */
+const search = document.getElementById("search");
+const results = document.getElementById("results");
+const selected = document.getElementById("selected");
+const selCode = document.getElementById("selCode");
+const selDesc = document.getElementById("selDesc");
+const qty = document.getElementById("qty");
+const fmt = document.getElementById("fmt");
+const obs = document.getElementById("obs");
+const status = document.getElementById("status");
+const pedidoTableBody = document.getElementById("pedidoTableBody");
+const toast = document.getElementById("toast");
+
+let toastTimer = null;
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add("show");
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> toast.classList.remove("show"), 2000);
+}
+
+/* Utils */
+function normalize(s){
+  return String(s)
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/ñ/g,"n")
+    .replace(/[^a-z0-9]+/g," ")
+    .trim();
+}
+function applyAliases(q){
+  const parts = normalize(q).split(" ").filter(Boolean);
+  const out = parts.map(w=>{
+    for(const rule of ALIASES){
+      if(rule.from.includes(w)) return rule.to;
+    }
+    return w;
+  });
+  return out.join(" ");
+}
+function tokenize(desc){ return normalize(desc).split(" ").filter(Boolean); }
+function cleanCell(s){ return String(s ?? "").replace(/\t/g," ").replace(/\r?\n/g," ").trim(); }
+function isDigits(s){ return /^[0-9]+$/.test(s); }
+
+function clearFieldErrors(){ qty.classList.remove("field-error"); fmt.classList.remove("field-error"); }
+function isComplete(){ return !!(cleanCell(qty.value) && cleanCell(fmt.value)); }
+
+function showNeedComplete(){
+  status.textContent = "⚠️ Completa Cantidad y Formato antes de seguir.";
+  status.className = "status bad";
+  clearFieldErrors();
+  if(!cleanCell(qty.value)) qty.classList.add("field-error");
+  if(!cleanCell(fmt.value)) fmt.classList.add("field-error");
+  alert("Completa Cantidad y Formato antes de seguir.");
+  if(!cleanCell(qty.value)) qty.focus(); else fmt.focus();
+}
+function blockIfIncomplete(){
+  if(actual && !isComplete()){
+    showNeedComplete();
+    return true;
+  }
+  return false;
+}
+
+/* WhatsApp */
+function buildMessage(){
+  const lines = [];
+  lines.push(["Cantidad","Formato","Código","Descripción","Observaciones"].join(TAB));
+  pedido.forEach(p=>{
+    lines.push([cleanCell(p.q), cleanCell(p.f), cleanCell(p.c), cleanCell(p.d), cleanCell(p.o||"")].join(TAB));
+  });
+  lines.push("");
+  lines.push(LINK);
+  return lines.join("\n");
+}
+
+/* Tabla */
+function renderTable(){
+  pedidoTableBody.innerHTML = "";
+  if(!pedido.length){
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="5" class="muted" style="padding:14px">No hay artículos añadidos todavía.</td>`;
+    pedidoTableBody.appendChild(tr);
+    return;
+  }
+
+  pedido.forEach(p=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="mono">${cleanCell(p.q)}</td>
+      <td>${cleanCell(p.f)}</td>
+      <td>${cleanCell(p.d)}</td>
+      <td>${cleanCell(p.o||"")}</td>
+      <td><button class="btn-mini danger" data-code="${p.c}">🗑 Eliminar</button></td>
+    `;
+    pedidoTableBody.appendChild(tr);
+  });
+
+  pedidoTableBody.querySelectorAll("button[data-code]").forEach(btn=>{
+    btn.onclick = ()=>{
+      if(actual){
+        if(isComplete()) saveNow();
+        else { showNeedComplete(); return; }
+      }
+      const code = btn.getAttribute("data-code");
+      pedido = pedido.filter(p=>p.c !== code);
+      status.textContent = "Artículo eliminado";
+      status.className = "status warn";
+      showToast("🗑 Artículo eliminado");
+      renderTable();
+    };
+  });
+}
+
+/* Editor */
+function closeEditor(){
+  actual = null;
+  if(autosaveTimer){ clearTimeout(autosaveTimer); autosaveTimer = null; }
+  selected.style.display = "none";
+  selCode.textContent = "";
+  selDesc.textContent = "";
+  qty.value = "";
+  fmt.value = "";
+  obs.value = "";
+  clearFieldErrors();
+}
+
+function openEditor(item){
+  actual = item;
+  if(autosaveTimer){ clearTimeout(autosaveTimer); autosaveTimer = null; }
+
+  selCode.textContent = item.c;
+  selDesc.textContent = item.d;
+  selected.style.display = "block";
+
+  const existing = pedido.find(p=>p.c===item.c);
+  qty.value = existing ? (existing.q||"") : "";
+  fmt.value = existing ? (existing.f||"") : "";
+  obs.value = existing ? (existing.o||"") : "";
+
+  clearFieldErrors();
+  qty.focus();
+}
+
+function saveNow(){
+  if(!actual || !isComplete()) return false;
+
+  const q = cleanCell(qty.value);
+  const f = cleanCell(fmt.value);
+  const o = cleanCell(obs.value);
+
+  let line = pedido.find(p=>p.c===actual.c);
+  if(!line){
+    line = { c: actual.c, d: actual.d };
+    pedido.push(line);
+  }
+  line.q = q; line.f = f; line.o = o;
+
+  pedido.sort((a,b)=> a.d.localeCompare(b.d, "es"));
+
+  status.textContent = "✅ Guardado automáticamente";
+  status.className = "status ok";
+
+  closeEditor();
+  search.value = "";
+  search.focus();
+  renderTable();
+  return true;
+}
+
+function scheduleAutosave(){
+  if(!actual) return;
+  if(autosaveTimer) clearTimeout(autosaveTimer);
+
+  autosaveTimer = setTimeout(()=>{
+    autosaveTimer = null;
+    if(isComplete()) saveNow();
+    else{
+      status.textContent = "Completa Cantidad y Formato para guardar.";
+      status.className = "status warn";
+    }
+  }, 700);
+}
+
+qty.addEventListener("input", ()=>{
+  qty.value = qty.value.replace(/[^0-9.,]/g, "").replace(",", ".");
+  clearFieldErrors();
+  scheduleAutosave();
+});
+fmt.addEventListener("change", ()=>{
+  clearFieldErrors();
+  scheduleAutosave();
+});
+obs.addEventListener("input", scheduleAutosave);
+
+document.getElementById("cancelEdit").onclick = ()=>{
+  closeEditor();
+  status.textContent = "Edición cancelada";
+  status.className = "status warn";
+  search.focus();
+};
+
+/* Buscador */
+function score(descTokens, qTokens){
+  let s = 0;
+  for(const qt of qTokens){
+    for(const dt of descTokens){
+      if(IGNORE_WORDS.has(dt)) continue;
+      if(dt === qt) s += 60;
+      else if(dt.startsWith(qt)) s += 35;
+      else if(dt.includes(qt)) s += 10;
+    }
+  }
+  return s;
+}
+function levenshtein(a,b){
+  const m=a.length, n=b.length;
+  const dp = Array.from({length:m+1}, ()=>Array(n+1).fill(0));
+  for(let i=0;i<=m;i++) dp[i][0]=i;
+  for(let j=0;j<=n;j++) dp[0][j]=j;
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      const cost = a[i-1]===b[j-1] ? 0 : 1;
+      dp[i][j] = Math.min(dp[i-1][j]+1, dp[i][j-1]+1, dp[i-1][j-1]+cost);
+    }
+  }
+  return dp[m][n];
+}
+
+search.addEventListener("focus", (e)=>{
+  if(blockIfIncomplete()){
+    e.preventDefault();
+    search.blur();
+  }
+});
+
+search.oninput = ()=>{
+  if(blockIfIncomplete()){
+    search.value = "";
+    return;
+  }
+
+  results.innerHTML="";
+  const raw = search.value.trim();
+  if(!raw){ results.style.display="none"; return; }
+  if(raw.length < 3){ results.style.display="none"; return; }
+
+  const qn = normalize(applyAliases(raw));
+  const qTokens = qn.split(" ").filter(Boolean);
+
+  let matches = ARTICULOS.map(a=>{
+    const code = normalize(a.c);
+    const dt = tokenize(a.d);
+    let s = 0;
+
+    if(isDigits(qn)){
+      if(code.startsWith(qn)) s = 999;
+    } else {
+      s = score(dt, qTokens);
+    }
+    return { ...a, s };
+  }).filter(x=>x.s>0)
+    .sort((a,b)=> b.s - a.s || a.d.localeCompare(b.d,"es"))
+    .slice(0, 25);
+
+  if(matches.length === 0 && !isDigits(qn) && qTokens.length === 1){
+    const q = qTokens[0];
+    matches = ARTICULOS.map(a=>{
+      const dt = tokenize(a.d).filter(w=>!IGNORE_WORDS.has(w));
+      let best = 99;
+      for(const w of dt){
+        if(w.length < 4) continue;
+        const d = levenshtein(q, w);
+        if(d < best) best = d;
+      }
+      const maxErr = q.length <= 5 ? 1 : 2;
+      const s = best <= maxErr ? (100 - best*10) : 0;
+      return { ...a, s };
+    }).filter(x=>x.s>0)
+      .sort((a,b)=> b.s - a.s || a.d.localeCompare(b.d,"es"))
+      .slice(0, 15);
+  }
+
+  matches.forEach(a=>{
+    const div=document.createElement("div");
+    div.className="result-item";
+    div.innerHTML=`<div class="code">${a.c}</div><div class="desc">${a.d}</div>`;
+    div.onclick=()=>{
+      if(blockIfIncomplete()) return;
+      openEditor(a);
+      results.style.display="none";
+      results.innerHTML="";
+      search.value="";
+    };
+    results.appendChild(div);
+  });
+
+  results.style.display = results.children.length ? "block" : "none";
+};
+
+/* Botones */
+document.getElementById("wa").onclick=()=>{
+  if(actual){
+    if(isComplete()) saveNow();
+    else { showNeedComplete(); return; }
+  }
+  if(!pedido.length){
+    status.textContent = "Pedido vacío";
+    status.className = "status warn";
+    showToast("Pedido vacío");
+    return;
+  }
+  location.href = `https://wa.me/${WHATSAPP}?text=` + encodeURIComponent(buildMessage());
+};
+
+document.getElementById("clear").onclick=()=>{
+  if(actual){
+    if(isComplete()) saveNow();
+    else { showNeedComplete(); return; }
+  }
+  pedido = [];
+  closeEditor();
+  status.textContent="Pedido limpiado";
+  status.className = "status warn";
+  showToast("Pedido limpiado");
+  renderTable();
+  search.value="";
+  search.focus();
+};
+
+/* INIT */
+renderTable();
+</script>
+</body>
+</html>

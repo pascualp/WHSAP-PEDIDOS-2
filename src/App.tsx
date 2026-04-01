@@ -451,7 +451,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
       <header className="max-w-4xl mx-auto p-4 flex justify-center">
         <img 
-          src="https://bonany.com/wp-content/uploads/2023/04/logo-bonany-1.png" 
+          src="https://i.postimg.cc/WbpmvhRj/LOGO.png" 
           alt="BonAny Logo" 
           className="h-16 w-auto"
         />

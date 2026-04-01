@@ -222,8 +222,8 @@ export default function App() {
       recognitionRef.current = recognition;
       recognition.start();
       setIsListening(true);
-      setAssistantState('IDLE');
-      showToast("Modo voz activado. Di 'selecciono' para empezar.");
+      setAssistantState('SEARCHING'); // <-- Asegurar que empieza en SEARCHING
+      showToast("Modo voz activado. Di el nombre del artículo.");
     }
   };
   

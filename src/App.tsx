@@ -148,6 +148,13 @@ export default function App() {
   
   const processVoiceCommand = (transcript: string) => {
     const text = transcript.toLowerCase();
+    console.log("Voice Command:", text, "State:", assistantState);
+    
+    // Helper to convert words to numbers
+    const wordToNum: {[key: string]: string} = {
+      "cero": "0", "uno": "1", "una": "1", "dos": "2", "tres": "3", "cuatro": "4",
+      "cinco": "5", "seis": "6", "siete": "7", "ocho": "8", "nueve": "9", "diez": "10"
+    };
     
     // 1. Searching
     if (assistantState === 'IDLE' || assistantState === 'SEARCHING') {
@@ -159,12 +166,25 @@ export default function App() {
 
     // 2. Quantity
     if (assistantState === 'QTY') {
-      const num = text.replace(/[^0-9.,]/g, "").replace(",", ".");
+      // Try to match number words or digits
+      let num = text.replace(/[^0-9.,]/g, "").replace(",", ".");
+      if (!num) {
+        const words = text.split(" ");
+        for (const w of words) {
+          if (wordToNum[w]) {
+            num = wordToNum[w];
+            break;
+          }
+        }
+      }
+      
       if (num) {
         setQty(num);
         setIsDirty(true);
         setAssistantState('FMT');
         showToast("Cantidad guardada. Dime el formato (kg, caja, ud).");
+      } else {
+        showToast("No entendí la cantidad. Di un número.");
       }
       return;
     }
@@ -182,6 +202,8 @@ export default function App() {
         setAssistantState('IDLE');
         showToast("Formato seleccionado. Guardando...");
         setTimeout(saveNow, 500);
+      } else {
+        showToast("No entendí el formato. Di kg, caja o unidad.");
       }
       return;
     }

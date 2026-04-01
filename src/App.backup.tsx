@@ -143,55 +143,12 @@ export default function App() {
   const [actual, setActual] = useState<{ c: string; d: string } | null>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [assistantState, setAssistantState] = useState<'IDLE' | 'SEARCHING' | 'QTY' | 'FMT'>('IDLE');
   const recognitionRef = useRef<any>(null);
   
-  const processVoiceCommand = (transcript: string) => {
-    const text = transcript.toLowerCase();
-    
-    // 1. Searching
-    if (assistantState === 'IDLE' || assistantState === 'SEARCHING') {
-      setAssistantState('SEARCHING');
-      setSearchTerm(text);
-      showToast(`Buscando: ${text}. Selecciona la variedad.`);
-      return;
-    }
-
-    // 2. Quantity
-    if (assistantState === 'QTY') {
-      const num = text.replace(/[^0-9.,]/g, "").replace(",", ".");
-      if (num) {
-        setQty(num);
-        setIsDirty(true);
-        setAssistantState('FMT');
-        showToast("Cantidad guardada. Dime el formato (kg, caja, ud).");
-      }
-      return;
-    }
-    
-    // 3. Format
-    if (assistantState === 'FMT') {
-      let selectedFmt = "";
-      if (text.includes("kilo") || text.includes("kg")) selectedFmt = "kg";
-      else if (text.includes("caja")) selectedFmt = "caja";
-      else if (text.includes("unidad") || text.includes("ud")) selectedFmt = "ud";
-      
-      if (selectedFmt) {
-        setFmt(selectedFmt);
-        setIsDirty(true);
-        setAssistantState('IDLE');
-        showToast("Formato seleccionado. Guardando...");
-        setTimeout(saveNow, 500);
-      }
-      return;
-    }
-  };
-
   const toggleListening = () => {
     if (isListening) {
       recognitionRef.current?.stop();
       setIsListening(false);
-      setAssistantState('IDLE');
     } else {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (!SpeechRecognition) {
@@ -200,30 +157,26 @@ export default function App() {
       }
       const recognition = new SpeechRecognition();
       recognition.lang = 'es-ES';
-      recognition.continuous = true; // Modo continuo
+      recognition.continuous = false;
       recognition.interimResults = false;
       
       recognition.onresult = (event: any) => {
-        const transcript = event.results[event.results.length - 1][0].transcript;
-        processVoiceCommand(transcript);
+        const transcript = event.results[0][0].transcript;
+        setSearchTerm(transcript);
+        setIsListening(false);
       };
       
-      recognition.onerror = (event: any) => {
-        console.error("Error de voz:", event.error);
+      recognition.onerror = () => {
+        setIsListening(false);
       };
       
       recognition.onend = () => {
-        // En modo continuo, si se detiene, intentamos reiniciar si sigue activo
-        if (isListening) {
-          try { recognition.start(); } catch(e) {}
-        }
+        setIsListening(false);
       };
       
       recognitionRef.current = recognition;
       recognition.start();
       setIsListening(true);
-      setAssistantState('IDLE');
-      showToast("Modo voz activado. Di 'selecciono' para empezar.");
     }
   };
   
@@ -318,10 +271,6 @@ export default function App() {
     setFmtError(false);
     setIsDirty(false);
     setTimeout(() => qtyInputRef.current?.focus(), 0);
-    
-    // Trigger voice assistant
-    setAssistantState('QTY');
-    showToast("Dime la cantidad.");
   };
 
   // Autosave effect

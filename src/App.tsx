@@ -141,6 +141,7 @@ interface PedidoItem {
 export default function App() {
   const [pedido, setPedido] = useState<PedidoItem[]>([]);
   const [actual, setActual] = useState<{ c: string; d: string } | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
   
   const [searchTerm, setSearchTerm] = useState("");
   const [qty, setQty] = useState("");
@@ -220,6 +221,7 @@ export default function App() {
     setObs("");
     setQtyError(false);
     setFmtError(false);
+    setIsDirty(false);
   };
 
   const openEditor = (item: { c: string; d: string }) => {
@@ -230,12 +232,13 @@ export default function App() {
     setObs(existing ? (existing.o || "") : "");
     setQtyError(false);
     setFmtError(false);
+    setIsDirty(false);
     setTimeout(() => qtyInputRef.current?.focus(), 0);
   };
 
   // Autosave effect
   useEffect(() => {
-    if (!actual) return;
+    if (!actual || !isDirty) return;
     const timer = setTimeout(() => {
       if (isComplete()) {
         saveNow();
@@ -245,7 +248,7 @@ export default function App() {
       }
     }, 700);
     return () => clearTimeout(timer);
-  }, [qty, fmt, obs, actual]);
+  }, [qty, fmt, obs, actual, isDirty]);
 
   const handleSearchFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     if (blockIfIncomplete()) {
@@ -530,6 +533,7 @@ export default function App() {
                 onChange={e => {
                   setQty(e.target.value.replace(/[^0-9.,]/g, "").replace(",", "."));
                   setQtyError(false);
+                  setIsDirty(true);
                 }}
                 placeholder="Cantidad"
                 type="number"
@@ -543,6 +547,7 @@ export default function App() {
                 onChange={e => {
                   setFmt(e.target.value);
                   setFmtError(false);
+                  setIsDirty(true);
                 }}
                 className={`w-full p-3 text-base border ${fmtError ? 'border-red-600 ring-2 ring-red-100' : 'border-slate-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white`}
               >
@@ -553,7 +558,10 @@ export default function App() {
               </select>
               <textarea
                 value={obs}
-                onChange={e => setObs(e.target.value)}
+                onChange={e => {
+                  setObs(e.target.value);
+                  setIsDirty(true);
+                }}
                 placeholder="Observaciones (opcional)"
                 className="w-full p-3 text-base border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px] md:min-h-[72px]"
               />
@@ -608,12 +616,20 @@ export default function App() {
                         <td className="p-3 text-sm align-top">{cleanCell(p.d)}</td>
                         <td className="p-3 text-sm align-top">{cleanCell(p.o)}</td>
                         <td className="p-3 align-top">
-                          <button
-                            onClick={() => removeArticle(p.c)}
-                            className="px-3 py-2 text-sm font-bold rounded-lg border border-red-600 bg-red-50 text-red-700 hover:bg-red-100"
-                          >
-                            🗑 Eliminar
-                          </button>
+                          <div className="flex flex-col gap-2">
+                            <button
+                              onClick={() => openEditor(p)}
+                              className="px-3 py-2 text-sm font-bold rounded-lg border border-blue-600 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                            >
+                              ✏️ Editar
+                            </button>
+                            <button
+                              onClick={() => removeArticle(p.c)}
+                              className="px-3 py-2 text-sm font-bold rounded-lg border border-red-600 bg-red-50 text-red-700 hover:bg-red-100"
+                            >
+                              🗑 Eliminar
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))

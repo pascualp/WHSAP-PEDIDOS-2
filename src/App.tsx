@@ -639,17 +639,17 @@ export default function App() {
         <section className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
           <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
             <div className="max-h-[52vh] overflow-auto">
-              <table className="w-full min-w-[780px] text-left border-collapse">
-                <thead className="bg-slate-50 text-slate-500 text-sm sticky top-0 z-10">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-slate-50 text-slate-500 text-xs sm:text-sm sticky top-0 z-10">
                   <tr>
-                    <th className="p-3 border-b border-slate-200 w-[90px] font-medium">Cantidad</th>
-                    <th className="p-3 border-b border-slate-200 w-[90px] font-medium">Formato</th>
-                    <th className="p-3 border-b border-slate-200 font-medium">Descripción</th>
-                    <th className="p-3 border-b border-slate-200 w-[260px] font-medium">Observaciones</th>
-                    <th className="p-3 border-b border-slate-200 w-[120px] font-medium">Acción</th>
+                    <th className="p-2 sm:p-3 border-b border-slate-200 w-[70px] sm:w-[90px] font-medium">Cant.</th>
+                    <th className="p-2 sm:p-3 border-b border-slate-200 w-[70px] sm:w-[90px] font-medium">Fmt.</th>
+                    <th className="p-2 sm:p-3 border-b border-slate-200 font-medium">Desc.</th>
+                    <th className="p-2 sm:p-3 border-b border-slate-200 w-[100px] sm:w-[260px] font-medium">Obs.</th>
+                    <th className="p-2 sm:p-3 border-b border-slate-200 w-[80px] sm:w-[120px] font-medium">Acción</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="text-sm">
                   {pedido.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="p-4 text-sm text-slate-500 text-center">No hay artículos añadidos todavía.</td>
@@ -657,23 +657,23 @@ export default function App() {
                   ) : (
                     pedido.map(p => (
                       <tr key={p.c} className="border-b border-slate-100 last:border-0">
-                        <td className="p-3 font-mono text-sm align-top">{cleanCell(p.q)}</td>
-                        <td className="p-3 text-sm align-top">{cleanCell(p.f)}</td>
-                        <td className="p-3 text-sm align-top">{cleanCell(p.d)}</td>
-                        <td className="p-3 text-sm align-top">{cleanCell(p.o)}</td>
-                        <td className="p-3 align-top">
-                          <div className="flex flex-col gap-2">
+                        <td className="p-2 sm:p-3 font-mono text-xs sm:text-sm align-top">{cleanCell(p.q)}</td>
+                        <td className="p-2 sm:p-3 text-xs sm:text-sm align-top">{cleanCell(p.f)}</td>
+                        <td className="p-2 sm:p-3 text-xs sm:text-sm align-top">{cleanCell(p.d)}</td>
+                        <td className="p-2 sm:p-3 text-xs sm:text-sm align-top">{cleanCell(p.o)}</td>
+                        <td className="p-2 sm:p-3 align-top">
+                          <div className="flex flex-col gap-1">
                             <button
                               onClick={() => openEditor(p)}
-                              className="px-3 py-2 text-sm font-bold rounded-lg border border-blue-600 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                              className="px-2 py-1 text-xs font-bold rounded-lg border border-blue-600 bg-blue-50 text-blue-700 hover:bg-blue-100"
                             >
-                              ✏️ Editar
+                              ✏️
                             </button>
                             <button
                               onClick={() => removeArticle(p.c)}
-                              className="px-3 py-2 text-sm font-bold rounded-lg border border-red-600 bg-red-50 text-red-700 hover:bg-red-100"
+                              className="px-2 py-1 text-xs font-bold rounded-lg border border-red-600 bg-red-50 text-red-700 hover:bg-red-100"
                             >
-                              🗑 Eliminar
+                              🗑
                             </button>
                           </div>
                         </td>
